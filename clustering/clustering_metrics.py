@@ -1,22 +1,15 @@
 import numpy as np
+from clustering_utils import euclidean_distance, manhattan_distance
 
-def euclidean_distance(x: np.ndarray, y: np.ndarray) -> float:
-    # check if y is a point or a list of points
-    if y.ndim == 2:
-        axis = 1
-    else:
-        axis = None
-    return np.sqrt(np.sum((x-y)**2, axis=axis))
+def get_distance_metric(distance_metric: str):
+    assert distance_metric in ['euclidean', 'manhattan'], "Invalid distance metric. Choose from 'euclidean' or 'manhattan'."
+    if distance_metric == 'euclidean':
+        return euclidean_distance
+    elif distance_metric == 'manhattan':
+        return manhattan_distance
 
-def manhattan_distance(x: np.ndarray, y: np.ndarray) -> float:
-    # check if y is a point or a list of points
-    if y.ndim == 2:
-        axis = 1
-    else:
-        axis = None
-    return np.sum(np.abs(x-y), axis=axis)
-
-def calculate_silhouette_score(X: np.ndarray,y:np.ndarray) -> float:
+def calculate_silhouette_score(X: np.ndarray,y:np.ndarray, distance_metric_str: str='euclidean') -> float:
+        distance_metric = get_distance_metric(distance_metric_str)
         unique_labels = np.unique(y)
         n_clusters = len(unique_labels)
 
@@ -29,26 +22,27 @@ def calculate_silhouette_score(X: np.ndarray,y:np.ndarray) -> float:
         for i,xi in enumerate(X):
             label = y[i]
             same_cluster = X[y==label]
-            a[i] = np.mean([euclidean_distance(xi,point) for point in same_cluster if not np.array_equal(xi,point)])
+            a[i] = np.mean([distance_metric(xi,point) for point in same_cluster if not np.array_equal(xi,point)])
             
             nearest_dist = float("inf")
             for curr_label in unique_labels:
                 if curr_label!=label:
                     other_cluster = X[y==curr_label]
-                    curr_dist = np.mean([euclidean_distance(xi,point) for point in other_cluster])
+                    curr_dist = np.mean([distance_metric(xi,point) for point in other_cluster])
                     if curr_dist<nearest_dist:
                         nearest_dist = curr_dist
             b[i] = nearest_dist
         silhouette_scores = (b-a)/np.maximum(a,b)
         return np.mean(silhouette_scores)
 
-def calculate_dunn_index(X: np.ndarray,y: np.ndarray) -> float:
+def calculate_dunn_index(X: np.ndarray,y: np.ndarray, distance_metric_str: str='euclidean') -> float:
+        distance_metric = get_distance_metric(distance_metric_str)
         unique_labels = np.unique(y)
         max_intra_cluster_distance = 0
         for label in unique_labels:
             same_cluster = X[y==label]
             intra_cluster_distances = [
-                euclidean_distance(same_cluster[i], same_cluster[j])
+                distance_metric(same_cluster[i], same_cluster[j])
                 for i in range(len(same_cluster))
                 for j in range(i + 1, len(same_cluster))  
             ]
@@ -60,7 +54,7 @@ def calculate_dunn_index(X: np.ndarray,y: np.ndarray) -> float:
             for label2 in unique_labels:
                 if label1!=label2:
                     cluster2 = X[y==label2]
-                    inter_cluster_distances = [euclidean_distance(point1,point2) for point1 in cluster1 for point2 in cluster2]
+                    inter_cluster_distances = [distance_metric(point1,point2) for point1 in cluster1 for point2 in cluster2]
                     min_inter_cluster_distance = min(min_inter_cluster_distance,min(inter_cluster_distances))
 
         # Avoid division by zero
@@ -69,14 +63,15 @@ def calculate_dunn_index(X: np.ndarray,y: np.ndarray) -> float:
         
         return min_inter_cluster_distance/max_intra_cluster_distance
     
-def calculate_davies_bouldin_index(X: np.ndarray,y: np.ndarray, centroids: np.ndarray) -> float:
+def calculate_davies_bouldin_index(X: np.ndarray,y: np.ndarray, centroids: np.ndarray, distance_metric_str: str='euclidean') -> float:
+    distance_metric = get_distance_metric(distance_metric_str)
     unique_labels = np.unique(y)
     avg_intra_cluster_distances = []
     for label in unique_labels:
         cluster = X[y==label]
         intra_cluster_distances = []
         for point in cluster:
-            dist_from_centroid = euclidean_distance(point,centroids[label])
+            dist_from_centroid = distance_metric(point,centroids[label])
             intra_cluster_distances.append(dist_from_centroid)
         avg_intra_cluster_distances.append(np.mean(intra_cluster_distances))
     
@@ -87,7 +82,7 @@ def calculate_davies_bouldin_index(X: np.ndarray,y: np.ndarray, centroids: np.nd
         for label2 in unique_labels:
             if label1!=label2:
                 centroid2 = centroids[label2]
-                d_ij = euclidean_distance(centroid1,centroid2)
+                d_ij = distance_metric(centroid1,centroid2)
                 if d_ij==0: # avoid division by zero
                     continue
                 curr_R_ij = (avg_intra_cluster_distances[label1]+avg_intra_cluster_distances[label2])/d_ij
