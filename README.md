@@ -9,7 +9,7 @@ This repository contains implementations of various machine learning algorithms 
 - **Mean Shift:** A hierarchical clustering algorithm that assigns data points to clusters iteratively.
 - **AdaBoost:** An ensemble boosting classifier that works by weighting the observations.
 - **Gaussian Mixture Model:** A probabilistic model for representing normally distributed subpopulations.
-- **K-Means:** A clustering algorithm that partitions observations into k clusters.
+- Several Clustering Algorithms such as: **KMeans**, **KMedians**, **DBSCAN**, **Agglomerative Clustering**.
 - **K-Nearest Neighbors (KNN):** A non-parametric method used for classification and regression.
 - **Linear Discriminant Analysis (LDA):** A classifier with a linear decision boundary.
 - **Linear Regression:** A linear approach to modeling the relationship between a dependent variable and one or more independent variables.
@@ -25,7 +25,8 @@ The algorithms implemented from scratch in this repository were inspired by the 
 1. [NeuralNine](https://www.youtube.com/@NeuralNine)
 2. [Patrick Loebar](https://www.youtube.com/@patloeber)
 3. [StatQuest](https://www.youtube.com/@statquest)
-4. Keep in mind that there are alot of other channels which I unfortunately lost track of :(
+4. Introduction to Statistical Learning Book
+5. Keep in mind that there are alot of other channels which I unfortunately lost track of :(
 
 ## Acknowledgments
 Special thanks to the authors and contributors of the educational content that has made this project possible. Their efforts in spreading knowledge and making complex topics accessible to the broader community are sincerely appreciated.
